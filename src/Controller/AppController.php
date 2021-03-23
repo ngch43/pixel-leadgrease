@@ -6,6 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
 
 use App\Entity\Campaign;
 
@@ -36,7 +38,7 @@ class AppController extends AbstractController
     /**
      * @Route("/app/campaign/view", name="app_campaign_view")
      */
-    public function viewCampaign(Request $request): Response
+    public function viewCampaign(Request $request, ValidatorInterface $validator): Response
     {
         $errors = [];
 
@@ -62,13 +64,13 @@ class AppController extends AbstractController
             $campaign->setUrl($request->get('url'));
             $campaign->setMethod($request->get('method'));
 
-            /* $errors = $validator->validate($campaign);
-            if (count($errors) == 0) { */
+            $errors = $validator->validate($campaign);
+            if (count($errors) == 0) {
                 $entityManager = $this->getDoctrine()->getManager();
                 $entityManager->persist($campaign);
                 $entityManager->flush();
                 return $this->redirectToRoute('app_list_campaigns');
-            /* } */
+            }
 
         }
         return $this->render('app/campaigns/view.html.twig',[
