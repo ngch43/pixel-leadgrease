@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Basic layout{% endblock %}
+
+{% block body %}
+    <style>
+        .wrapper { 
+            min-height: 100vh;
+            display: flex; 
+        }
+    </style>
+    <div class="wrapper flex-row align-items-center">
+        {% block content %}
+        {% endblock %}
+    </div>
+{% endblock %}

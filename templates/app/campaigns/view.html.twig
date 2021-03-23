@@ -1,0 +1,34 @@
+{% extends 'layouts/default.html.twig' %}
+
+{% block title %}Campaign view{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row d-flex justify-content-center">
+            <div class="col-sm-12 col-md-4">
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <form method="post">
+                            <label for="input-token">Token</label>
+                            <input type="text" name="token" id="input-token" value="{{ campaign.token ?? '' }}" class="form-control" placeholder="Enter the token" required autofocus>
+                            <label for="input-pixel">Url</label>
+                            <input type="url" name="url" id="input-url" value="{{ campaign.url ?? '' }}" class="form-control" placeholder="Enter the url" required>
+                            <label for="input-select-pixel">Method</label>
+                            <select name="method" id="input-select-method" class="form-control" placeholder="Select an option" required>
+                                <option hidden>-- Select an option --</option>
+                                <option value="GET" {% if campaign.method == 'GET' %} selected {% endif %}>GET</option>
+                                <option value="POST" {% if campaign.method == 'POST' %} selected {% endif %}>POST</option>
+                                <option value="PUT" {% if campaign.method == 'PUT' %} selected {% endif %}>PUT</option>
+                            </select>
+                            <label for="input-pixel">Pixel</label>
+                            <input type="text" name="pixel" id="input-pixel" value="{{ campaign.pixel ?? '' }}" class="form-control" placeholder="Enter the pixel percent" required>
+                            <button class="button--submit btn btn-lg btn-primary" type="submit">
+                                Sign in
+                            </button>
+                        </form>
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
