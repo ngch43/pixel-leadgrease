@@ -23,7 +23,7 @@ class AppController extends AbstractController
     }
 
     /**
-     * @Route("/campaigns", name="app_list_campaigns")
+     * @Route("/app/campaigns", name="app_list_campaigns")
      */
     public function listCampaigns(): Response
     {
