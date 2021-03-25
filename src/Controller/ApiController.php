@@ -44,25 +44,24 @@ class ApiController extends AbstractController
         $pixel_response = $leadgrease_client->getPixelResponse($campaign->getPixel());
         $info = $leadgrease_client->getInfo();
         $url = $campaign->getUrl();
-        $method = $campaign->getMethod();
 
-        $info_data = $info['fields'];
-        if($method == 'GET')
-            $info_data = $info['query'];
+        /* if($campaign->getMethod())
+            $info['method'] = $campaign->getMethod(); */
 
         try {
-            $response = $leadgrease_client->sendInfo($url,$method,$info_data,$info['headers']); 
+            $response = $leadgrease_client->sendInfo($url,$info); 
             $data = [
                 'pixel' => $pixel_response,
-                'response' => $response
+                'response' => $response['data']
             ];
-            return new ApiResponse($data);
+            
+            return new ApiResponse($data,$response['code']);
         } catch (\Throwable $th) {
+            var_dump($th);
             $data = [
                 'pixel' => 'ko_pixel'
             ];
-            var_dump($th);
-            return new ApiResponse($data);
+            return new ApiResponse($data,500);
         }
         
         

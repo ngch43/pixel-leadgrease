@@ -73,6 +73,10 @@ class Client
         return $query;
     }
 
+    public function getRequestMethod(){
+        return $_SERVER['REQUEST_METHOD'];
+    }
+
     
 
     public function getInfo()
@@ -80,42 +84,46 @@ class Client
         $info = [];
 
         $info['headers'] = $this->getHeaders();
-        $info['fields'] = $this->getFields();
+        $info['body'] = $this->getFields();
         $info['query'] = $this->getQuery();
+        $info['method'] = $this->getRequestMethod();
         
         return $info;
     }
 
-    public function sendInfo($url, $method = 'GET' ,$data = [], $headers = [] ){
+    public function sendInfo($url, $info){
         $curl_cliente = curl_init();
         curl_setopt($curl_cliente, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl_cliente, CURLOPT_VERBOSE, true);
         curl_setopt($curl_cliente, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($curl_cliente, CURLOPT_SSL_VERIFYPEER, 0);
 
-        $method = strtoupper($method);
+        $method = strtoupper($info['method']);
+        $body = $info['body'];
+        $query = $info['query'];
+        $headers = $info['headers'];
 
-        $query = http_build_query($data);
+        
+        $query = http_build_query($query);
 
-        if( $method == 'GET'){
-            $url = $url.'?'.$query;
-            unset($headers['Content-Type']);
-            
-        }else{
-            if ($method == 'POST'){
-                curl_setopt($curl_cliente, CURLOPT_POST, 1);
-            }else if($method == 'PUT'){
-                curl_setopt($curl_cliente, CURLOPT_CUSTOMREQUEST, "PUT"); 
-            }
-            if($headers['Content-Type'] == 'application/x-www-form-urlencoded'){
-                curl_setopt($curl_cliente, CURLOPT_POSTFIELDS, $query);
-                $headers['Content-Length'] = strlen($query); 
-            }else{
-                $json = json_encode($data);
-                curl_setopt($curl_cliente, CURLOPT_POSTFIELDS,$json);
-                $headers['Content-Length'] = strlen($json);  
-            } 
+        $url = $url.'?'.$query;
+
+        curl_setopt($curl_cliente, CURLOPT_CUSTOMREQUEST, $method); 
+        if ($method == 'POST'){
+            curl_setopt($curl_cliente, CURLOPT_POST, 1);
         }
+
+
+        if($headers['Content-Type'] == 'application/x-www-form-urlencoded'){
+            $body = http_build_query($body);
+            curl_setopt($curl_cliente, CURLOPT_POSTFIELDS, $body);
+            $headers['Content-Length'] = strlen($body); 
+        }else{
+            $json = json_encode($body);
+            curl_setopt($curl_cliente, CURLOPT_POSTFIELDS,$json);
+            $headers['Content-Length'] = strlen($json);  
+        } 
+        
          
         $request_headers = [];
         foreach ($headers as $key => $value) {
@@ -124,7 +132,8 @@ class Client
         curl_setopt($curl_cliente, CURLOPT_HTTPHEADER, $request_headers);
 
         curl_setopt($curl_cliente, CURLOPT_URL, $url);
-        $response = curl_exec($curl_cliente);
+        $response['data'] = curl_exec($curl_cliente);
+        $response['code'] = curl_getinfo($curl_cliente, CURLINFO_HTTP_CODE);
         curl_close($curl_cliente);
 
         return $response;

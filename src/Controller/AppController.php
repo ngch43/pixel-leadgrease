@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+use Ramsey\Uuid\Uuid;
 
 use App\Entity\Campaign;
 
@@ -54,6 +55,8 @@ class AppController extends AbstractController
                     'No campaign found for id '.$campaign_id
                 );
             }
+        }else{
+            $campaign->setToken(Uuid::uuid4());
         }
         
         if ($request->isMethod('POST')) {
