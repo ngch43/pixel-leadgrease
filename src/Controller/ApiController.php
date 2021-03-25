@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 use App\Exception\CampaignNotFoundException;
 use App\LeadgreaseLib\Client;
@@ -40,20 +41,30 @@ class ApiController extends AbstractController
 
         $leadgrease_client = new Client();
 
-        $leadgrease_client->setPixel($client->getPixel());
-        $data = $leadgrease_client->getInfo();
-        $data['url'] = $campaign->getUrl();
-        $data['method'] = $campaign->getMethod();
+        $pixel_response = $leadgrease_client->getPixelResponse($campaign->getPixel());
+        $info = $leadgrease_client->getInfo();
+        $url = $campaign->getUrl();
+        $method = $campaign->getMethod();
 
-        $response = $leadgrease_client->sendInfo($data);   
-        unset($data['url']);
-        unset($data['method']);
+        $info_data = $info['fields'];
+        if($method == 'GET')
+            $info_data = $info['query'];
 
-        $data = [
-            'request' => $data,
-            'response' => $response
-        ];
-        return new ApiResponse($data);
+        try {
+            $response = $leadgrease_client->sendInfo($url,$method,$info_data,$info['headers']); 
+            $data = [
+                'pixel' => $pixel_response,
+                'response' => $response
+            ];
+            return new ApiResponse($data);
+        } catch (\Throwable $th) {
+            $data = [
+                'pixel' => 'ko_pixel'
+            ];
+            var_dump($th);
+            return new ApiResponse($data);
+        }
+        
         
     }
 }
