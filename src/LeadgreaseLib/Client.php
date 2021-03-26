@@ -49,7 +49,6 @@ class Client
     public function getHeaders()
     {
         $headers = getallheaders();
-        unset($headers['Host']);
         return $headers;
     }
 

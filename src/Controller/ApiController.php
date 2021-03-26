@@ -45,6 +45,7 @@ class ApiController extends AbstractController
 
             $pixel_response = $leadgrease_client->getPixelResponse($campaign->getPixel());
             $info = $leadgrease_client->getInfo();
+            $info['headers'] = $this->unsetDefaultHeaders($info['headers']);
             $info['url'] = $campaign->getUrl();
 
             $response = $leadgrease_client->sendInfo($info['url'],$info);
@@ -67,5 +68,13 @@ class ApiController extends AbstractController
         }
         
         
+    }
+
+    public function unsetDefaultHeaders($headers){
+        $list = ["Host","X-Forwarded-Host"];
+        foreach ($list as $value) {
+            unset($headers[$value]);
+        }
+        return $headers;
     }
 }
