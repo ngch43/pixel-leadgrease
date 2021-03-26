@@ -54,10 +54,9 @@ class ApiController extends AbstractController
                 'pixel' => $pixel_response,
                 'response' => $response['data']
             ];
-            
             return new ApiResponse($data,$response['code']);
         } catch (\Throwable $th) {
-            var_dump($th);
+            // var_dump($th);
             $data = [
                 'pixel' => 'ko_pixel'
             ];

@@ -12,9 +12,11 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
+                            <th scope="col">Name</th>
                             <th scope="col">Token</th>
                             <th scope="col">Url</th>
                             <th scope="col">Method</th>
+                            <th scope="col">Active</th>
                             <th scope="col">Pixel</th>
                             <th scope="col">Options</th>
                         </tr>
@@ -23,15 +25,32 @@
                         {% for campaign in campaigns %}
                             <tr>
                                 <th scope="row">{{ campaign.id }}</th>
+                                <td>{{ campaign.name }}</td>
                                 <td>{{ campaign.token }}</td>
                                 <td>{{ campaign.url }}</td>
                                 <td>{{ campaign.method }}</td>
+                                <td>
+                                    <div class="form-group form-check">
+                                        <input 
+                                            type="checkbox" 
+                                            name="active"  
+                                            class="form-check-input"
+                                            id="checkbox-active"
+                                            {% if campaign.active == true %} checked {% endif %}
+                                            readonly
+                                        >
+                                        <label class="form-check-label" for="checkbox-active">
+                                            {% if campaign.active == true %} Active {% endif %}
+                                            {% if campaign.active == false %} Disable {% endif %}
+                                        </label>
+                                    </div>
+                                </td>
                                 <td>{{ campaign.pixel }} % </td>
                                 <td>
                                     <a class="btn btn-primary" href="{{ path('app_campaign_view', { campaign_id:campaign.id }) }}" ><i class="far fa-save"></i></a>
-                                    <button class="btn btn-danger">
+                                    <a class="btn btn-danger" href="{{ path('app_campaign_delete', { campaign_id:campaign.id }) }}">
                                         <i class="fas fa-trash"></i>
-                                    </button>
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}

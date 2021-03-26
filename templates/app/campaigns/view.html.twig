@@ -14,9 +14,14 @@
                                 <input type="text" name="token" id="input-token" value="{{ campaign.token ?? '' }}" class="form-control" placeholder="Enter the token" required readonly>
                             </div>
                             <div class="form-group">
+                                <label for="input-name">Name</label>
+                                <input type="text" name="name" id="input-name" value="{{ campaign.name ?? '' }}" class="form-control" placeholder="Enter the name" required autofocus>
+                            </div>
+                            <div class="form-group">
                                 <label for="input-pixel">Url</label>
                                 <input type="url" name="url" id="input-url" value="{{ campaign.url ?? '' }}" class="form-control" placeholder="Enter the url" required>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="input-select-pixel">Method</label>
                                 <select name="method" id="input-select-method" class="form-control" placeholder="Select an option" required>
@@ -29,6 +34,17 @@
                             <div class="form-group">
                                 <label for="input-pixel">Pixel</label>
                                 <input type="text" name="pixel" id="input-pixel" value="{{ campaign.pixel ?? '' }}" class="form-control" placeholder="Enter the pixel percent" required>    
+                            </div>
+
+                            <div class="form-group form-check">
+                                <input 
+                                    type="checkbox" 
+                                    name="active"  
+                                    class="form-check-input"
+                                    id="checkbox-active"
+                                    {% if campaign.active == true %} checked {% endif %}
+                                >
+                                <label class="form-check-label" for="checkbox-active">Active</label>
                             </div>
                             
                            <!-- <div class="form-group">

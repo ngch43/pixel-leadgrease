@@ -7,10 +7,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 use Ramsey\Uuid\Uuid;
 
 use App\Entity\Campaign;
+use App\Entity\User;
+
 
 class AppController extends AbstractController
 {
@@ -27,10 +30,13 @@ class AppController extends AbstractController
      */
     public function listCampaigns(): Response
     {
+        $user = $this->getUser();
 
         $campaigns = $this->getDoctrine()
             ->getRepository(Campaign::class)
-            ->findAll();
+            ->findBy([
+                'user' => $user
+            ]);
 
         return $this->render('app/campaigns/index.html.twig', [
             'campaigns' => $campaigns,
@@ -46,6 +52,8 @@ class AppController extends AbstractController
         $campaign = new Campaign();
         $campaign_id = $request->query->get('campaign_id');
 
+        // $user = $this->get('security.token_storage')->getToken()->getUser();
+        $user = $this->getUser();
         if(!empty($campaign_id)){
             $campaign = $this->getDoctrine()
                 ->getRepository(Campaign::class)
@@ -58,15 +66,20 @@ class AppController extends AbstractController
         }else{
             $campaign->setToken(Uuid::uuid4());
         }
+
         
         if ($request->isMethod('POST')) {
-
+            
             
             $campaign->setToken($request->get('token'));
+            $campaign->setName($request->get('name'));
             $campaign->setPixel($request->get('pixel'));
             $campaign->setUrl($request->get('url'));
             $campaign->setMethod($request->get('method'));
 
+            $active = $request->get('active')? true:false;
+            $campaign->setActive($active);
+            $campaign->setUser($user);
             $errors = $validator->validate($campaign);
             if (count($errors) == 0) {
                 $entityManager = $this->getDoctrine()->getManager();
@@ -80,5 +93,25 @@ class AppController extends AbstractController
             'errors' => $errors,
             'campaign' => $campaign
         ]);
+    }
+
+    /**
+     * @Route("/app/campaign/delete", name="app_campaign_delete")
+     */
+    public function deleteCampaign(Request $request): Response
+    {
+        $campaign_id = $request->query->get('campaign_id');
+
+        if(!empty($campaign_id)){
+            $campaign = $this->getDoctrine()
+                ->getRepository(Campaign::class)
+                ->find($campaign_id);
+            if ($campaign) {
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->remove($campaign);
+                $entityManager->flush();
+            }
+        }
+        return $this->redirectToRoute('app_list_campaigns');
     }
 }

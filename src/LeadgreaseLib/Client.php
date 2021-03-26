@@ -134,6 +134,9 @@ class Client
         curl_setopt($curl_cliente, CURLOPT_URL, $url);
         $response['data'] = curl_exec($curl_cliente);
         $response['code'] = curl_getinfo($curl_cliente, CURLINFO_HTTP_CODE);
+        if(!$response['code']){
+        $response['code'] = 500;
+        }
         curl_close($curl_cliente);
 
         return $response;
