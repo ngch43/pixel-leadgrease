@@ -34,11 +34,12 @@ class ApiResponse extends JsonResponse
      */
     private function format($data = null)
     {
-        if ($data === null) {
+        /* if ($data === null) {
             $response['data'] = new \ArrayObject();
         }else{
             $response['data'] = $data;
-        }
+        } */
+        $response = $data;
         return $response;
     }
 }

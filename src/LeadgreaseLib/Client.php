@@ -48,7 +48,9 @@ class Client
 
     public function getHeaders()
     {
-        return getallheaders();
+        $headers = getallheaders();
+        unset($headers['Host']);
+        return $headers;
     }
 
     public function getFields()
@@ -103,18 +105,17 @@ class Client
         $query = $info['query'];
         $headers = $info['headers'];
 
-        
         $query = http_build_query($query);
 
         $url = $url.'?'.$query;
-
+        
         curl_setopt($curl_cliente, CURLOPT_CUSTOMREQUEST, $method); 
         if ($method == 'POST'){
             curl_setopt($curl_cliente, CURLOPT_POST, 1);
         }
 
-
-        if($headers['Content-Type'] == 'application/x-www-form-urlencoded'){
+        //var_dump($headers);
+        if(array_key_exists ('Content-Type', $headers) && $headers['Content-Type'] == 'application/x-www-form-urlencoded'){
             $body = http_build_query($body);
             curl_setopt($curl_cliente, CURLOPT_POSTFIELDS, $body);
             $headers['Content-Length'] = strlen($body); 
@@ -127,22 +128,27 @@ class Client
          
         $request_headers = [];
         foreach ($headers as $key => $value) {
-            array_push($request_headers, $key.": ".$value);
+                array_push($request_headers, $key.": ".$value);
         }
         curl_setopt($curl_cliente, CURLOPT_HTTPHEADER, $request_headers);
-
+        curl_setopt($curl_cliente, CURLINFO_HEADER_OUT, true);
         curl_setopt($curl_cliente, CURLOPT_URL, $url);
-        $response['data'] = curl_exec($curl_cliente);
+        // curl_setopt($curl_cliente,CURLINFO_HEADER_OUT);
+        $response['body'] = curl_exec($curl_cliente);
+        $response['effective_url'] = curl_getinfo($curl_cliente, CURLINFO_EFFECTIVE_URL);
         $response['code'] = curl_getinfo($curl_cliente, CURLINFO_HTTP_CODE);
+        // $response['info'] = curl_getinfo($curl_cliente);
+
+
         if(!$response['code']){
-        $response['code'] = 500;
+            $response['code'] = 500;
         }
         curl_close($curl_cliente);
 
         return $response;
     }
 
-    public function sendInfoTest($data){
+    /* public function sendInfoTest($data){
 
         $curl_cliente = curl_init();
         curl_setopt($curl_cliente, CURLOPT_RETURNTRANSFER, 1);
@@ -166,7 +172,7 @@ class Client
         
         if( $method == 'GET'){
             $url = $data['url'].'?'.$query;
-            unset($headers['Content-Type']);
+            // unset($headers['Content-Type']);
             
         }else{
             if ($method == 'POST'){
@@ -200,6 +206,6 @@ class Client
         curl_close($curl_cliente);
 
         return $response;
-    }
+    } */
 
 }
