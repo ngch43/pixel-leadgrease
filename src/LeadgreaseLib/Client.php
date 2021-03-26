@@ -106,8 +106,8 @@ class Client
         $headers = $info['headers'];
 
         $query = http_build_query($query);
-
-        $url = $url.'?'.$query;
+        if($query)
+            $url = $url.'?'.$query;
         
         curl_setopt($curl_cliente, CURLOPT_CUSTOMREQUEST, $method); 
         if ($method == 'POST'){
