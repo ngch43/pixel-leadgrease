@@ -8,6 +8,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 use App\Exception\CampaignNotFoundException;
+use App\Exception\RequestException;
+
 use App\LeadgreaseLib\Client;
 use App\Entity\Campaign;
 
@@ -34,22 +36,25 @@ class ApiController extends AbstractController
             ->findOneBy([
                 'token' => $token,
             ]);
+        try {
+            if (!$campaign) {
+                throw new CampaignNotFoundException( 'Token not found '.$token );
+            }
 
-        if (!$campaign) {
-            throw new CampaignNotFoundException( 'Token not found '.$token );
-        }
+            $leadgrease_client = new Client();
 
-        $leadgrease_client = new Client();
-
-        $pixel_response = $leadgrease_client->getPixelResponse($campaign->getPixel());
-        $info = $leadgrease_client->getInfo();
-        $url = $campaign->getUrl();
+            $pixel_response = $leadgrease_client->getPixelResponse($campaign->getPixel());
+            $info = $leadgrease_client->getInfo();
+            $url = $campaign->getUrl();
 
         /* if($campaign->getMethod())
             $info['method'] = $campaign->getMethod(); */
 
-        try {
-            $response = $leadgrease_client->sendInfo($url,$info); 
+            
+            $response = $leadgrease_client->sendInfo($url,$info);
+            if($response['code'] != 200){
+                $pixel_response = 'ko_pixel';
+            } 
             $data = [
                 'pixel' => $pixel_response,
                 'response' => $response['data']
@@ -58,7 +63,8 @@ class ApiController extends AbstractController
         } catch (\Throwable $th) {
             // var_dump($th);
             $data = [
-                'pixel' => 'ko_pixel'
+                'pixel' => 'ko_pixel',
+                'error' => $th->getMessage()
             ];
             return new ApiResponse($data,500);
         }
